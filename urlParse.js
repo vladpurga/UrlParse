@@ -8,19 +8,23 @@ function urlParse(url){
 	var self = {};
 	//Store full url
 	self.url = url;
-	//array to store params
-	self.QueryParams = new Array();
+	//Store Query String params
+	self.QueryParams = {};
 	//Use DOM to get URL basics
 	self.a = document.createElement('a');
 	self.a.href = url;
-	//Parse Query String
-	q_seg = self.a.search.substring(1).split('&');
-	for(i=0; i<q_seg.length;i++){
-		s = q_seg[i].split('=');
-		self.QueryParams[s[0]] = s[1];
+	if (self.a.search.length) {
+		//Parse Query String
+		var q_seg = self.a.search.substring(1).split('&');
+		for (var i = 0; i < q_seg.length; i++) {
+			var s = q_seg[i].split('=');
+			if (s[0]) {
+				self.QueryParams[s[0]] = (s[1] || '');
+			}
+		}
 	}
 	//Extract the Port
-	self.port = url.split('/')[2].split(':')[1];
+	self.port = self.a.port || undefined; // url.split('/')[2].split(':')[1];
 	
 	//Return Protocol in use
 	self.getProtocol = function(){
@@ -33,9 +37,7 @@ function urlParse(url){
 	//Return Port
 	self.getPort = function(){
 		//Assume default port if none is set
-		return  (self.port == null)
-				? ((self.getProtocol=='https:')?443:80) 
-				: self.port; 
+		return self.port || (self.getProtocol() == 'https:' ? 443 : 80);
 	}
 	//Return Path
 	self.getPath = function(){
@@ -45,21 +47,58 @@ function urlParse(url){
 	self.getQueryString = function(){
 		return self.a.search;
 	}
-	//Get Query String as Array
-	self.getQueryArray = function(){
+	//Build Query String from QueryParams
+	self.buildQueryString = function(){
+		var qs = '',
+			params = [];
+		for (var param in self.getQueryParams()) {
+			params.push(param + '=' + self.getQueryParam(param));
+		}
+		if (params.length) {
+			qs = '?' + params.join('&');
+		}
+		return qs;
+	}
+	//Get Query String as key=>value object
+	self.getQueryParams = function(){
 		return self.QueryParams;
 	}
+	//Get Query String as Array
+	//@deprecated : Use getQueryParams instead
+	self.getQueryArray = self.getQueryParams;
 	//Get value of parameter in query string
 	self.getQueryParam = function(x){
 		return self.QueryParams[x];
+	}
+	//Get Fragment
+	self.getFragment = function(){
+		return self.a.hash.substring(1);//Remove # from start
 	}
 	//Return original URL
 	self.getURL = function(){
 		return self.url;
 	}
-	//Get Fragment
-	self.getFragment = function(){
-		return self.a.hash.substring(1);//Remove # from start
+	//Build URL by else parsed original URL
+	self.buildURL = function(){
+		var url = self.getProtocol() + '//' || 'http://';
+		url += self.getHost() || '';
+		url += self.port ? ':' + self.port : '';
+		url += self.getPath() || '';
+		url += self.buildQueryString();
+		url += self.getFragment() ? '#' + self.getFragment() : '';
+		return url;
+	}
+	//Drop any param
+	self.dropQueryParam = function(name){
+		if (self.QueryParams[name]) {
+			delete self.QueryParams[name];
+		}
+	}
+	//Add any param
+	self.addQueryParam = function(name, value){
+		// if (!self.QueryParams[name]) {
+		self.QueryParams[name] = value;
+		//}
 	}
 	
 	//Return self

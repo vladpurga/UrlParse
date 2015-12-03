@@ -7,7 +7,7 @@
 	<script type="text/javascript">
 		var qArray;//In global scope so you can play with it via the console.
 		
-		function runDemo(){
+		function parseUrl(){
 			//Parse url useing parseURl
 			url = document.getElementById('url').value;
 			parsed = urlParse(url);
@@ -26,6 +26,9 @@
 			}
 			document.getElementById('query').innerHTML = qs;
 		}
+		function buildUrl(){
+			document.getElementById('urlb').value = parsed.buildURL();
+		}
 		function testEnter(e){
 			if(window.event){
 				if(window.event.keyCode == 13) runDemo();
@@ -39,7 +42,7 @@
 	 .demo {width:500px; margin:10px auto;background-color:whitesmoke;}
 	 .demo .form {padding:5px; background-color:#ccc;}
 	 .demo .form h3 {margin:5px;}
-	 #url {width:480px; padding:2px; border:solid 1px;}
+	 .url {width:480px; padding:2px; border:solid 1px;}
 	 .demo .form .test {border:solid 1px; padding:4px;margin:0px;font-weight:bold;cursor:pointer;background-color:#fff;}
 	 .demo .form .test:hover {background-color:#eee;}
 	 .output {text-align:left;width:500px;}
@@ -51,8 +54,10 @@
 <div class='demo'>
 	<div class='form'>
 		<h3>ParseURL Tester</h3>
-		<input type='text' id='url' value='http://sub.domain.com:1337/test.php?param1=Hello&param2=Goodbye#test' onkeypress="testEnter()"/>
-		<input type='submit' class='test' value='parseUrl' onClick='runDemo(event);'/>
+		<input type='text' class='url' id='url' value='http://sub.domain.com:1337/test.php?param1=Hello&param2=Goodbye#test' onkeypress="testEnter()"/>
+		<input type='text' class='url' id='urlb' disabled="disabled" />
+		<input type='submit' class='test' value='parseUrl' onClick='parseUrl(event);'/>
+		<input type='submit' class='test' value='buildUrl' onClick='buildUrl(event);'/>
 	</div>
 	<div>
 		<table class='output'>

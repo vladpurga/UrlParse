@@ -12,7 +12,11 @@ function urlParse(url){
 	self.QueryParams = {};
 	//Use DOM to get URL basics
 	self.a = document.createElement('a');
-	self.a.href = url;
+	if (/^(http|https|ftp|ftps|sftp):\/\//.test(url)) {
+		self.a.href = url;
+	} else {
+		self.a.href = 'http://' + url.replace(/^.*:\/\//, '');
+	}
 	if (self.a.search.length) {
 		//Parse Query String
 		var q_seg = self.a.search.substring(1).split('&');
